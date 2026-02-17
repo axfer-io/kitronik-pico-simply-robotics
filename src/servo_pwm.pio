@@ -1,0 +1,17 @@
+.program servo_pwm
+.side_set 1 opt
+
+; OSR recibe el "period" (pulso en us: 500..2500)
+; ISR se precarga con pulseTrain = 20000 (us)  (se manda 1 vez al init)
+; La idea: la salida se queda en 0, y se pone en 1 cuando y==x,
+; luego se mantiene en 1 hasta que se vuelve a hacer pull (que fuerza side(0)).
+
+pull    noblock    side 0
+mov     x, osr
+mov     y, isr
+
+loop:
+jmp     x!=y, skip
+nop             side 1
+skip:
+jmp     y--, loop
