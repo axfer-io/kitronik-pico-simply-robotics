@@ -3,6 +3,10 @@
 #include "servo_pwm.pio.h"   // generado por pico_generate_pio_header()
 #include <algorithm>
 #include "hardware/clocks.h"
+<<<<<<< HEAD
+=======
+
+>>>>>>> 998a650 (Fix: include and link hardware_clocks for clock_get_hz)
 
 // ---------------------- SimplePWMMotor ----------------------
 
