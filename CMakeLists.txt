@@ -10,6 +10,7 @@ target_link_libraries(kitronik_pico_simply_robotics
     pico_stdlib
     hardware_pwm
     hardware_pio
+    hardware_clocks
 )
 
 pico_generate_pio_header(kitronik_pico_simply_robotics
