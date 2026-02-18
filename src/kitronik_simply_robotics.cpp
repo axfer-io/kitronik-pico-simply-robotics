@@ -3,10 +3,7 @@
 #include "servo_pwm.pio.h"   // generado por pico_generate_pio_header()
 #include <algorithm>
 #include "hardware/clocks.h"
-<<<<<<< HEAD
-=======
 
->>>>>>> 998a650 (Fix: include and link hardware_clocks for clock_get_hz)
 
 // ---------------------- SimplePWMMotor ----------------------
 
@@ -206,23 +203,46 @@ void PIOServo::deregisterServo() {
     active_ = false;
 }
 
+void PIOServo::setPulseRangeUs(int min_us, int max_us) {
+    // clamp básico y coherencia
+    min_us = clampi(min_us, kMinPulseUs, kMaxPulseUs);
+    max_us = clampi(max_us, kMinPulseUs, kMaxPulseUs);
+    if (max_us < min_us) std::swap(max_us, min_us);
+
+    minPulseUs_ = min_us;
+    maxPulseUs_ = max_us;
+}
+
+void PIOServo::setPulseOffsetUs(int offset_us) {
+    // trim razonable, por si quieres afinar sin romper
+    offsetUs_ = clampi(offset_us, -500, 500);
+}
+
 void PIOServo::goToPosition(int degrees) {
     degrees = clampi(degrees, 0, 180);
-    // degreesToUS = 2000/180, offset 500
-    int pulse = (int)(degrees * (2000.0f / 180.0f) + 500.0f);
+
+    const float t = (float)degrees / 180.0f;
+    int pulse = (int)((1.0f - t) * (float)minPulseUs_ + t * (float)maxPulseUs_);
+
+    pulse += offsetUs_;
     goToPeriod(pulse);
 }
 
 void PIOServo::goToRadians(float radians) {
     if (radians < 0.0f) radians = 0.0f;
     if (radians > kPi)  radians = kPi;
-    int pulse = (int)((radians / kPi) * 2000.0f + 500.0f);
+
+    const float t = radians / kPi;
+    int pulse = (int)((1.0f - t) * (float)minPulseUs_ + t * (float)maxPulseUs_);
+
+    pulse += offsetUs_;
     goToPeriod(pulse);
 }
 
 void PIOServo::goToPeriod(int period_us) {
-    period_us = clampi(period_us, kMinPulseUs, kMaxPulseUs);
-    if (!active_) return; // sin exceptions: si está “unregistered”, no hace nada
+    // ahora clamp por instancia (y con offset ya aplicado)
+    period_us = clampi(period_us, minPulseUs_, maxPulseUs_);
+    if (!active_) return;
     pio_sm_put_blocking(pio_, sm_, (uint32_t)period_us);
 }
 

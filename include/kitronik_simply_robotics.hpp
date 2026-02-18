@@ -47,6 +47,10 @@ public:
 
     bool isActive() const;
 
+    // New: range per servo (in microseconds)
+    void setPulseRangeUs(int min_us, int max_us);
+    void setPulseOffsetUs(int offset_us); // opcional: trim fino (±us)
+
 private:
     void initSM_(uint servoPin);
 
@@ -59,6 +63,10 @@ private:
     static constexpr int kMinPulseUs   = 500;
     static constexpr int kMaxPulseUs   = 2500;
     static constexpr float kPi = 3.1416f;
+
+    int minPulseUs_ = kMinPulseUs;
+    int maxPulseUs_ = kMaxPulseUs;
+    int offsetUs_   = 0;
 };
 
 class KitronikSimplyRobotics {
